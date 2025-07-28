@@ -8,6 +8,13 @@ import entidades.SalaReuniao;
 import entidades.Auditorio;
 import entidades.Reserva;
 import entidades.ServicoAdicional;
+import excecoes.ClienteJaCadastradoException;
+import excecoes.ClienteNaoEncontradoException;
+import excecoes.HorarioConflituosoException;
+import excecoes.EspacoIndisponivelException;
+import excecoes.FalhaPersistenciaException;
+import excecoes.ReservaNaoEncontradaException;
+import excecoes.ServicoInvalidoException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.LocalDateTime;
@@ -48,8 +55,12 @@ public class AdministradorSistema
     repositorioEspacos.inserir(presidencial);
   }
 
-  public void cadastrarCliente(String cpf, String nome, String email, String telefone)
+  public void cadastrarCliente(String cpf, String nome, String email, String telefone) throws ClienteJaCadastradoException
   {
+    if (repositorioClientes.buscar(cpf) != null)
+    {
+      throw new ClienteJaCadastradoException("Cliente com CPF " + cpf + " já está cadastrado!");
+    }
     Cliente cliente = new Cliente(cpf, nome, email, telefone);
     repositorioClientes.inserir(cliente);
   }
@@ -81,23 +92,32 @@ public class AdministradorSistema
     }
   }
 
-  public void fazerReserva(String cpfCliente, String idEspaco, LocalDateTime inicio, LocalDateTime fim) throws Exception
+  public void fazerReserva(String cpfCliente, String idEspaco, LocalDateTime inicio, LocalDateTime fim) throws ClienteNaoEncontradoException, EspacoIndisponivelException, HorarioConflituosoException
   {
     Cliente cliente = repositorioClientes.buscar(cpfCliente);
     if (cliente == null)
     {
-      throw new Exception("Cliente não encontrado");
+      throw new ClienteNaoEncontradoException("Cliente com CPF " + cpfCliente + " não encontrado!");
     }
 
     Espaco espaco = repositorioEspacos.buscar(idEspaco);
     if (espaco == null)
     {
-      throw new Exception("Espaço não encontrado");
+      throw new EspacoIndisponivelException("Espaço com ID " + idEspaco + " não encontrado!");
     }
 
     if (!espaco.isDisponivel())
     {
-      throw new Exception("Espaço não disponível");
+      throw new EspacoIndisponivelException("Espaço " + espaco.getNome() + " não está disponível!");
+    }
+
+    LocalDate dataReserva = inicio.toLocalDate();
+    LocalTime horaInicio = inicio.toLocalTime();
+    LocalTime horaFim = fim.toLocalTime();
+    
+    if (evitarHorarioConflituoso(idEspaco, dataReserva, horaInicio, horaFim))
+    {
+      throw new HorarioConflituosoException("Conflito de horário! Já existe uma reserva para o espaço " + espaco.getNome() + " no período " + horaInicio + " às " + horaFim + " na data " + dataReserva);
     }
 
     int novoId = repositorioReservas.listarTodos().size() + 1;
@@ -105,47 +125,64 @@ public class AdministradorSistema
     repositorioReservas.inserir(reserva);
   }
 
-  public void realizarReserva(String cpfCliente, String idEspaco, LocalDate dataReserva, LocalTime horaInicio, LocalTime horaFim, List<ServicoAdicional> servicos)
+  public void realizarReserva(String cpfCliente, String idEspaco, LocalDate dataReserva, LocalTime horaInicio, LocalTime horaFim, List<ServicoAdicional> servicos) throws ClienteNaoEncontradoException, EspacoIndisponivelException, HorarioConflituosoException
   {
     Cliente cliente = repositorioClientes.buscar(cpfCliente);
-    Espaco espaco = repositorioEspacos.buscar(idEspaco);
-
-    if (cliente != null && espaco != null && espaco.isDisponivel())
+    if (cliente == null)
     {
-      double valorTotal = calcularValorTotal(espaco, horaInicio, horaFim, servicos);
-      int id = repositorioReservas.obterProximoId();
-      Reserva reserva = new Reserva(id, cliente, espaco, dataReserva, horaInicio, horaFim);
-      
-      for (ServicoAdicional servico : servicos)
-      {
-        reserva.adicionarServico(servico);
-      }
-      
-      repositorioReservas.inserir(reserva);
-      espaco.setDisponivel(false);
+      throw new ClienteNaoEncontradoException("Cliente com CPF " + cpfCliente + " não encontrado!");
     }
+    
+    Espaco espaco = repositorioEspacos.buscar(idEspaco);
+    if (espaco == null)
+    {
+      throw new EspacoIndisponivelException("Espaço com ID " + idEspaco + " não encontrado!");
+    }
+    
+    if (!espaco.isDisponivel())
+    {
+      throw new EspacoIndisponivelException("Espaço " + espaco.getNome() + " não está disponível!");
+    }
+
+    if (evitarHorarioConflituoso(idEspaco, dataReserva, horaInicio, horaFim))
+    {
+      throw new HorarioConflituosoException("Conflito de horário! Já existe uma reserva para o espaço " + espaco.getNome() + " no período " + horaInicio + " às " + horaFim + " na data " + dataReserva);
+    }
+
+    double valorTotal = calcularValorTotal(espaco, horaInicio, horaFim, servicos);
+    int id = repositorioReservas.obterProximoId();
+    Reserva reserva = new Reserva(id, cliente, espaco, dataReserva, horaInicio, horaFim);
+    
+    for (ServicoAdicional servico : servicos)
+    {
+      reserva.adicionarServico(servico);
+    }
+    
+    repositorioReservas.inserir(reserva);
+    espaco.setDisponivel(false);
   }
 
-  public void cancelarReserva(String idReserva) throws Exception
+  public void cancelarReserva(String idReserva) throws ReservaNaoEncontradaException
   {
     int id = Integer.parseInt(idReserva);
     Reserva reserva = repositorioReservas.buscar(id);
     if (reserva == null)
     {
-      throw new Exception("Reserva não encontrada");
+      throw new ReservaNaoEncontradaException("Reserva com ID " + id + " não encontrada!");
     }
     reserva.getEspaco().setDisponivel(true);
     repositorioReservas.remover(id);
   }
 
-  public void cancelarReserva(int idReserva)
+  public void cancelarReserva(int idReserva) throws ReservaNaoEncontradaException
   {
     Reserva reserva = repositorioReservas.buscar(idReserva);
-    if (reserva != null)
+    if (reserva == null)
     {
-      reserva.getEspaco().setDisponivel(true);
-      repositorioReservas.remover(idReserva);
+      throw new ReservaNaoEncontradaException("Reserva com ID " + idReserva + " não encontrada!");
     }
+    reserva.getEspaco().setDisponivel(true);
+    repositorioReservas.remover(idReserva);
   }
 
   public void verificarDisponibilidade(String idEspaco, LocalDate data, LocalTime hora)
@@ -157,13 +194,41 @@ public class AdministradorSistema
     }
   }
 
-  public void adicionarServicoReserva(int idReserva, ServicoAdicional servico)
+  public void adicionarServicoReserva(int idReserva, ServicoAdicional servico) throws ReservaNaoEncontradaException, ServicoInvalidoException
   {
     Reserva reserva = repositorioReservas.buscar(idReserva);
-    if (reserva != null)
+    if (reserva == null)
     {
-      reserva.adicionarServico(servico);
+      throw new ReservaNaoEncontradaException("Reserva com ID " + idReserva + " não encontrada!");
     }
+    
+    if (servico == null)
+    {
+      throw new ServicoInvalidoException("Serviço inválido!");
+    }
+    
+    reserva.adicionarServico(servico);
+  }
+
+  private boolean evitarHorarioConflituoso(String idEspaco, LocalDate dataReserva, LocalTime horaInicio, LocalTime horaFim)
+  {
+    List<Reserva> reservasExistentes = repositorioReservas.listarTodos();
+    
+    for (Reserva reserva : reservasExistentes)
+    {
+      if (reserva.getEspaco().getId().equals(idEspaco) && reserva.getDataReserva().equals(dataReserva))
+      {
+        LocalTime inicioExistente = reserva.getHoraInicio();
+        LocalTime fimExistente = reserva.getHoraFim();
+        
+        if (horaInicio.isBefore(fimExistente) && horaFim.isAfter(inicioExistente))
+        {
+          return true;
+        }
+      }
+    }
+    
+    return false;
   }
 
   public double calcularValorTotal(Espaco espaco, LocalTime horaInicio, LocalTime horaFim, List<ServicoAdicional> servicos)
@@ -249,7 +314,7 @@ public class AdministradorSistema
     }
   }
 
-  public void salvarDados()
+  public void salvarDados() throws FalhaPersistenciaException
   {
     try
     {
@@ -259,11 +324,11 @@ public class AdministradorSistema
     }
     catch (Exception e)
     {
-      System.out.println("Erro ao salvar dados: " + e.getMessage());
+      throw new FalhaPersistenciaException("Erro ao salvar dados: " + e.getMessage());
     }
   }
 
-  public void carregarDados()
+  public void carregarDados() throws FalhaPersistenciaException
   {
     try
     {
@@ -273,7 +338,7 @@ public class AdministradorSistema
     }
     catch (Exception e)
     {
-      System.out.println("Erro ao carregar dados: " + e.getMessage());
+      throw new FalhaPersistenciaException("Erro ao carregar dados: " + e.getMessage());
     }
   }
 

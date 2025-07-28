@@ -5,6 +5,7 @@ import entidades.EstacaoTrabalho;
 import entidades.SalaPrivada;
 import entidades.SalaReuniao;
 import entidades.Auditorio;
+import controle.AdministradorSistema;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,13 +14,12 @@ import java.util.List;
 public class MenuEspacos
 {
   private Scanner scanner;
-  private List<Espaco> espacos;
+  private AdministradorSistema administrador;
 
   public MenuEspacos(Scanner scanner)
   {
     this.scanner = scanner;
-    this.espacos = new ArrayList<>();
-    carregarEspacosTeste();
+    this.administrador = new AdministradorSistema();
   }
 
   public void exibir()
@@ -80,20 +80,20 @@ public class MenuEspacos
     double valorHora = scanner.nextDouble();
     scanner.nextLine();
 
-    Espaco espaco = null;
+    String tipoEspaco = "";
     switch (tipo)
     {
       case 1:
-        espaco = new EstacaoTrabalho(id, nome, valorHora, true);
+        tipoEspaco = "EstacaoTrabalho";
         break;
       case 2:
-        espaco = new SalaPrivada(id, nome, valorHora, true);
+        tipoEspaco = "SalaPrivada";
         break;
       case 3:
-        espaco = new SalaReuniao(id, nome, valorHora, true);
+        tipoEspaco = "SalaReuniao";
         break;
       case 4:
-        espaco = new Auditorio(id, nome, valorHora, true);
+        tipoEspaco = "Auditorio";
         break;
       default:
         System.out.println("Tipo inválido!");
@@ -101,7 +101,7 @@ public class MenuEspacos
         return;
     }
 
-    espacos.add(espaco);
+    administrador.criarEspaco(tipoEspaco, id, nome, valorHora);
     System.out.println("Espaço cadastrado com sucesso!");
     pausar();
   }
@@ -110,6 +110,7 @@ public class MenuEspacos
   {
     limparTela();
     System.out.println("»»» KAFFEECOWORKHUB - LISTA DE ESPAÇOS «««");
+    List<Espaco> espacos = administrador.getRepositorioEspacos().listarTodos();
     if (espacos.isEmpty())
     {
       System.out.println("Nenhum espaço cadastrado.");
@@ -137,15 +138,7 @@ public class MenuEspacos
     System.out.print("Digite o ID: ");
     String id = scanner.nextLine();
 
-    Espaco encontrado = null;
-    for (Espaco espaco : espacos)
-    {
-      if (espaco.getId().equals(id))
-      {
-        encontrado = espaco;
-        break;
-      }
-    }
+    Espaco encontrado = administrador.getRepositorioEspacos().buscar(id);
 
     if (encontrado != null)
     {
@@ -157,14 +150,6 @@ public class MenuEspacos
       System.out.println("Espaço não encontrado!");
     }
     pausar();
-  }
-
-  private void carregarEspacosTeste()
-  {
-    espacos.add(new EstacaoTrabalho("E001", "Estação Alpha", 15.0, true));
-    espacos.add(new SalaPrivada("S001", "Sala Beta", 45.0, true));
-    espacos.add(new SalaReuniao("R001", "Sala Gamma", 80.0, true));
-    espacos.add(new Auditorio("A001", "Auditório Delta", 150.0, true));
   }
 
   private void limparTela()

@@ -1,6 +1,9 @@
 package fronteira;
 
 import entidades.Cliente;
+import controle.AdministradorSistema;
+import excecoes.ClienteJaCadastradoException;
+import excecoes.ClienteNaoEncontradoException;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,13 +12,12 @@ import java.util.List;
 public class MenuClientes
 {
   private Scanner scanner;
-  private List<Cliente> clientes;
+  private AdministradorSistema administrador;
 
   public MenuClientes(Scanner scanner)
   {
     this.scanner = scanner;
-    this.clientes = new ArrayList<>();
-    carregarClientesTeste();
+    this.administrador = new AdministradorSistema();
   }
 
   public void exibir()
@@ -68,10 +70,15 @@ public class MenuClientes
     System.out.print("Numero de telefone: ");
     String telefone = scanner.nextLine();
 
-    Cliente cliente = new Cliente(cpf, nome, email, telefone);
-    clientes.add(cliente);
-    
-    System.out.println("Cliente cadastrado com sucesso!");
+    try
+    {
+      administrador.cadastrarCliente(cpf, nome, email, telefone);
+      System.out.println("Cliente cadastrado com sucesso!");
+    }
+    catch (ClienteJaCadastradoException e)
+    {
+      System.out.println("Erro: " + e.getMessage());
+    }
     pausar();
   }
 
@@ -79,6 +86,7 @@ public class MenuClientes
   {
     limparTela();
     System.out.println("»»» KAFFEECOWORKHUB - LISTA DE CLIENTES «««");
+    List<Cliente> clientes = administrador.getRepositorioClientes().listarTodos();
     if (clientes.isEmpty())
     {
       System.out.println("Nenhum cliente cadastrado.");
@@ -92,6 +100,7 @@ public class MenuClientes
         System.out.println("   CPF: " + cliente.getCpf());
         System.out.println("   Email: " + cliente.getEmail());
         System.out.println("   Telefone: " + cliente.getTelefone());
+        System.out.println("   Data Cadastro: " + cliente.getDataCadastro());
         System.out.println();
       }
     }
@@ -105,15 +114,7 @@ public class MenuClientes
     System.out.print("Digite o CPF: ");
     String cpf = scanner.nextLine();
 
-    Cliente encontrado = null;
-    for (Cliente cliente : clientes)
-    {
-      if (cliente.getCpf().equals(cpf))
-      {
-        encontrado = cliente;
-        break;
-      }
-    }
+    Cliente encontrado = administrador.getRepositorioClientes().buscar(cpf);
 
     if (encontrado != null)
     {
@@ -122,18 +123,13 @@ public class MenuClientes
       System.out.println("CPF: " + encontrado.getCpf());
       System.out.println("Email: " + encontrado.getEmail());
       System.out.println("Telefone: " + encontrado.getTelefone());
+      System.out.println("Data Cadastro: " + encontrado.getDataCadastro());
     }
     else
     {
       System.out.println("Cliente não encontrado!");
     }
     pausar();
-  }
-
-  private void carregarClientesTeste()
-  {
-    clientes.add(new Cliente("12345678901", "João Silva", "joao@email.com", "11999887766"));
-    clientes.add(new Cliente("98765432109", "Maria Santos", "maria@email.com", "11888776655"));
   }
 
   private void limparTela()

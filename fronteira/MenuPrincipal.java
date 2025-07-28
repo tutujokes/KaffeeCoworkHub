@@ -1,5 +1,7 @@
 package fronteira;
 
+import fronteira.MenuRelatorios;
+import controle.AdministradorSistema;
 import entidades.Administrador;
 import java.util.Scanner;
 
@@ -8,10 +10,12 @@ public class MenuPrincipal
 {
   private Scanner scanner;
   private Administrador adminLogado;
+  private AdministradorSistema administradorSistema;
 
   public MenuPrincipal()
   {
     this.scanner = new Scanner(System.in);
+    this.administradorSistema = new AdministradorSistema();
   }
 
   public void exibir()
@@ -58,6 +62,7 @@ public class MenuPrincipal
       System.out.println("1. Gerenciar Clientes");
       System.out.println("2. Gerenciar Espaços");
       System.out.println("3. Gerenciar Reservas");
+      System.out.println("4. Relatórios");
       System.out.println("0. Sair");
       System.out.print("Escolha uma opção: ");
       
@@ -74,6 +79,9 @@ public class MenuPrincipal
           break;
         case 3:
           new MenuReservas(scanner).exibir();
+          break;
+        case 4:
+          new MenuRelatorios(scanner, administradorSistema).exibir();
           break;
         case 0:
           System.out.println("Saindo do sistema...");
@@ -108,9 +116,9 @@ public class MenuPrincipal
     }
   }
 
-  private void quebrarExecucao()
+  private void pausar()
   {
-    System.out.println("Pressione qualquer botão para continuar...");
+    System.out.println("Pressione Enter para continuar...");
     scanner.nextLine();
   }
 }

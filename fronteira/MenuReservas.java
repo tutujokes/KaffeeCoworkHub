@@ -10,27 +10,31 @@ import entidades.CafePremium;
 import entidades.Locker;
 import entidades.Estacionamento;
 import entidades.RecebimentoCorrespondencia;
+import controle.AdministradorSistema;
+import excecoes.ClienteJaCadastradoException;
+import excecoes.ClienteNaoEncontradoException;
+import excecoes.HorarioConflituosoException;
+import excecoes.EspacoIndisponivelException;
+import excecoes.FalhaPersistenciaException;
+import excecoes.ReservaNaoEncontradaException;
+import excecoes.ServicoInvalidoException;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 
 public class MenuReservas
 {
   private Scanner scanner;
-  private List<Reserva> reservas;
-  private List<Cliente> clientes;
-  private List<Espaco> espacos;
+  private AdministradorSistema administrador;
 
   public MenuReservas(Scanner scanner)
   {
     this.scanner = scanner;
-    this.reservas = new ArrayList<>();
-    this.clientes = new ArrayList<>();
-    this.espacos = new ArrayList<>();
-    carregarDadosTeste();
+    this.administrador = new AdministradorSistema();
   }
 
   public void exibir()
@@ -71,6 +75,7 @@ public class MenuReservas
           System.out.println("Opção inválida!");
           pausar();
       }
+      }
     }
   }
 
@@ -78,53 +83,36 @@ public class MenuReservas
   {
     limparTela();
     System.out.println("»»» KAFFEECOWORKHUB - FAZER RESERVA «««");
+    System.out.println("Exemplo de Formato: 21/12/2024 às 17:14");
+    System.out.println();
     
-    listarClientesSimples();
-    System.out.print("Insira o cliente: ");
-    int indiceCliente = scanner.nextInt() - 1;
-    scanner.nextLine();
+    System.out.print("CPF do Cliente: ");
+    String cpf = scanner.nextLine();
     
-    if (indiceCliente < 0 || indiceCliente >= clientes.size())
-    {
-      System.out.println("Cliente inválido!");
-      pausar();
-      return;
-    }
+    System.out.print("ID do Espaço: ");
+    String idEspaco = scanner.nextLine();
     
-    listarEspacosSimples();
-    System.out.print("Insira o espaço: ");
-    int indiceEspaco = scanner.nextInt() - 1;
-    scanner.nextLine();
+    System.out.print("Data (DD/MM/AAAA): ");
+    String dataStr = scanner.nextLine();
+    LocalDate data = LocalDate.parse(dataStr, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     
-    if (indiceEspaco < 0 || indiceEspaco >= espacos.size())
-    {
-      System.out.println("Espaço inválido!");
-      pausar();
-      return;
-    }
-    System.out.print("Data: ");
-    String data = scanner.nextLine();
-    System.out.print("Hora início: ");
-    String horaInicio = scanner.nextLine();
-    System.out.print("Hora final: ");
-    String horaFim = scanner.nextLine();
-
+    System.out.print("Hora início (HH:MM): ");
+    String horaInicioStr = scanner.nextLine();
+    LocalTime horaInicio = LocalTime.parse(horaInicioStr);
+    
+    System.out.print("Hora fim (HH:MM): ");
+    String horaFimStr = scanner.nextLine();
+    LocalTime horaFim = LocalTime.parse(horaFimStr);
+    
     try
     {
-      LocalDate dataReserva = LocalDate.parse(data);
-      LocalTime inicio = LocalTime.parse(horaInicio);
-      LocalTime fim = LocalTime.parse(horaFim);
-      
-      int novoId = reservas.size() + 1;
-      Reserva reserva = new Reserva(novoId, clientes.get(indiceCliente), espacos.get(indiceEspaco),
-                                    dataReserva, inicio, fim);
-      
-      reservas.add(reserva);
-      System.out.println("Reserva criada com sucesso! ID: " + novoId);
+      List<ServicoAdicional> servicos = new ArrayList<>();
+      administrador.realizarReserva(cpf, idEspaco, data, horaInicio, horaFim, servicos);
+      System.out.println("Reserva realizada com sucesso!");
     }
     catch (Exception e)
     {
-      System.out.println("Erro ao criar reserva: " + e.getMessage());
+      System.out.println("Erro: " + e.getMessage());
     }
     pausar();
   }
@@ -133,6 +121,7 @@ public class MenuReservas
   {
     limparTela();
     System.out.println("»»» KAFFEECOWORKHUB - LISTA DE RESERVAS «««");
+    List<Reserva> reservas = administrador.getRepositorioReservas().listarTodos();
     if (reservas.isEmpty())
     {
       System.out.println("Nenhuma reserva encontrada.");
@@ -162,15 +151,7 @@ public class MenuReservas
     int id = scanner.nextInt();
     scanner.nextLine();
 
-    Reserva encontrada = null;
-    for (Reserva reserva : reservas)
-    {
-      if (reserva.getId() == id)
-      {
-        encontrada = reserva;
-        break;
-      }
-    }
+    Reserva encontrada = administrador.getRepositorioReservas().buscar(id);
 
     if (encontrada != null)
     {
@@ -196,23 +177,6 @@ public class MenuReservas
     System.out.print("ID da reserva: ");
     int id = scanner.nextInt();
     scanner.nextLine();
-
-    Reserva reserva = null;
-    for (Reserva r : reservas)
-    {
-      if (r.getId() == id)
-      {
-        reserva = r;
-        break;
-      }
-    }
-
-    if (reserva == null)
-    {
-      System.out.println("Reserva não encontrada!");
-      pausar();
-      return;
-    }
 
     System.out.println("Serviços disponíveis:");
     System.out.println("1. Café Premium");
@@ -249,37 +213,16 @@ public class MenuReservas
         return;
     }
 
-    reserva.adicionarServico(servico);
-    System.out.println("Serviço adicionado com sucesso!");
+    try
+    {
+      administrador.adicionarServicoReserva(id, servico);
+      System.out.println("Serviço adicionado com sucesso!");
+    }
+    catch (Exception e)
+    {
+      System.out.println("Erro: " + e.getMessage());
+    }
     pausar();
-  }
-
-  private void listarClientesSimples()
-  {
-    System.out.println("Clientes disponíveis:");
-    for (int i = 0; i < clientes.size(); i++)
-    {
-      System.out.println((i + 1) + ". " + clientes.get(i).getNome());
-    }
-  }
-
-  private void listarEspacosSimples()
-  {
-    System.out.println("Espaços disponíveis:");
-    for (int i = 0; i < espacos.size(); i++)
-    {
-      Espaco espaco = espacos.get(i);
-      System.out.println((i + 1) + ". " + espaco.getTipo() + " - " + espaco.getNome());
-    }
-  }
-
-  private void carregarDadosTeste()
-  {
-    clientes.add(new Cliente("12345678901", "João Silva", "joao@email.com", "11999887766"));
-    clientes.add(new Cliente("98765432109", "Maria Santos", "maria@email.com", "11888776655"));
-    
-    espacos.add(new EstacaoTrabalho("E001", "Estação Alpha", 15.0, true));
-    espacos.add(new SalaPrivada("S001", "Sala Beta", 45.0, true));
   }
 
   private void limparTela()
