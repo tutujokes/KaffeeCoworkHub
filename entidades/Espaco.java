@@ -1,6 +1,8 @@
 package entidades;
 
-public abstract class Espaco
+import java.io.Serializable;
+
+public abstract class Espaco implements Serializable
 {
   protected String id;
   protected String nome;

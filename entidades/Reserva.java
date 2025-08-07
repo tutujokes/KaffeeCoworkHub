@@ -4,8 +4,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.Serializable;
 
-public class Reserva
+public class Reserva implements Serializable
 {
   private int id;
   private Cliente cliente;

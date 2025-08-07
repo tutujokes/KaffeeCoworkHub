@@ -84,6 +84,16 @@ public class MenuPrincipal
           new MenuRelatorios(scanner, administradorSistema).exibir();
           break;
         case 0:
+          System.out.println("Salvando dados...");
+          try
+          {
+            administradorSistema.salvarDados();
+            System.out.println("Dados salvos com sucesso!");
+          }
+          catch (Exception e)
+          {
+            System.out.println("Erro ao salvar dados: " + e.getMessage());
+          }
           System.out.println("Saindo do sistema...");
           continuar = false;
           break;

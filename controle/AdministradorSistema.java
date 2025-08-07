@@ -37,6 +37,17 @@ public class AdministradorSistema
     this.repositorioReservas = new RepositorioReservas();
     this.contadorReservas = 1;
     inicializarEspacos();
+    
+    // Carregar dados se existirem
+    try
+    {
+      carregarDados();
+    }
+    catch (Exception e)
+    {
+      // Se não conseguir carregar, continua com dados vazios
+      System.out.println("Iniciando com dados vazios.");
+    }
   }
 
   private void inicializarEspacos()
