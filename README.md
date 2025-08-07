@@ -28,9 +28,25 @@ O nome "KaffeeCoworkHub" vem da palavra alemã "Kaffee", que significa "café" e
 
 ### Como Usar
 
-1. Acesse o repositório: [KaffeeCoworkHub](https://github.com/tutujokes/KaffeeCoworkHub.git)
-2. Clone o repositório e compile o projeto.
-3. Execute o projeto e siga as instruções no console.
+1. **Clone o repositório:**
+   ```bash
+   git clone https://github.com/tutujokes/KaffeeCoworkHub.git
+   cd KaffeeCoworkHub
+   ```
+
+2. **Compile o projeto:**
+   ```bash
+   javac Main.java
+   ```
+
+3. **Execute o projeto:**
+   ```bash
+   java Main
+   ```
+
+4. **Credenciais de login:**
+   - Login: `admin`
+   - Senha: `1234`
 
 </details>
 
@@ -64,9 +80,25 @@ The name "KaffeeCoworkHub" comes from the German word "Kaffee," which means "cof
 
 ### How to Use
 
-1. Access the repository: [KaffeeCoworkHub](https://github.com/tutujokes/KaffeeCoworkHub.git)
-2. Clone the repository and compile the project.
-3. Run the project and follow the console instructions.
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/tutujokes/KaffeeCoworkHub.git
+   cd KaffeeCoworkHub
+   ```
+
+2. **Compile the project:**
+   ```bash
+   javac Main.java
+   ```
+
+3. **Run the project:**
+   ```bash
+   java Main
+   ```
+
+4. **Login credentials:**
+   - Login: `admin`
+   - Password: `1234`
 
 </details>
 
@@ -100,8 +132,24 @@ El nombre "KaffeeCoworkHub" proviene de la palabra alemana "Kaffee", que signifi
 
 ### Cómo Usar
 
-1. Accede al repositorio: [KaffeeCoworkHub](https://github.com/tutujokes/KaffeeCoworkHub.git)
-2. Clona el repositorio y compila el proyecto.
-3. Ejecuta el proyecto y sigue las instrucciones en la consola.
+1. **Clona el repositorio:**
+   ```bash
+   git clone https://github.com/tutujokes/KaffeeCoworkHub.git
+   cd KaffeeCoworkHub
+   ```
+
+2. **Compila el proyecto:**
+   ```bash
+   javac Main.java
+   ```
+
+3. **Ejecuta el proyecto:**
+   ```bash
+   java Main
+   ```
+
+4. **Credenciales de acceso:**
+   - Login: `admin`
+   - Contraseña: `1234`
 
 </details>

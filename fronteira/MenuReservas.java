@@ -75,7 +75,6 @@ public class MenuReservas
           System.out.println("Opção inválida!");
           pausar();
       }
-      }
     }
   }
 

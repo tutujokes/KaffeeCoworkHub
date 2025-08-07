@@ -44,4 +44,3 @@ public class Cliente
     return dataCadastro;
   }
 }
-}
