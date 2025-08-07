@@ -16,10 +16,10 @@ public class MenuEspacos
   private Scanner scanner;
   private AdministradorSistema administrador;
 
-  public MenuEspacos(Scanner scanner)
+  public MenuEspacos(Scanner scanner, AdministradorSistema administrador)
   {
     this.scanner = scanner;
-    this.administrador = new AdministradorSistema();
+    this.administrador = administrador;
   }
 
   public void exibir()

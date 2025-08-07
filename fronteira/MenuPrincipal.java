@@ -72,13 +72,13 @@ public class MenuPrincipal
       switch (opcao)
       {
         case 1:
-          new MenuClientes(scanner).exibir();
+          new MenuClientes(scanner, administradorSistema).exibir();
           break;
         case 2:
-          new MenuEspacos(scanner).exibir();
+          new MenuEspacos(scanner, administradorSistema).exibir();
           break;
         case 3:
-          new MenuReservas(scanner).exibir();
+          new MenuReservas(scanner, administradorSistema).exibir();
           break;
         case 4:
           new MenuRelatorios(scanner, administradorSistema).exibir();

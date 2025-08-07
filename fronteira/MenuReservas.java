@@ -31,10 +31,10 @@ public class MenuReservas
   private Scanner scanner;
   private AdministradorSistema administrador;
 
-  public MenuReservas(Scanner scanner)
+  public MenuReservas(Scanner scanner, AdministradorSistema administrador)
   {
     this.scanner = scanner;
-    this.administrador = new AdministradorSistema();
+    this.administrador = administrador;
   }
 
   public void exibir()

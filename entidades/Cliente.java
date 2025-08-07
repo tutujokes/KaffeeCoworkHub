@@ -1,8 +1,9 @@
 package entidades;
 
 import java.time.LocalDate;
+import java.io.Serializable;
 
-public class Cliente
+public class Cliente implements Serializable
 {
   private String cpf;
   private String nome;

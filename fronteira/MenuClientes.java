@@ -14,10 +14,10 @@ public class MenuClientes
   private Scanner scanner;
   private AdministradorSistema administrador;
 
-  public MenuClientes(Scanner scanner)
+  public MenuClientes(Scanner scanner, AdministradorSistema administrador)
   {
     this.scanner = scanner;
-    this.administrador = new AdministradorSistema();
+    this.administrador = administrador;
   }
 
   public void exibir()
