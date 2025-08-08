@@ -91,15 +91,15 @@ public class MenuReservas
     System.out.print("ID do Espaço: ");
     String idEspaco = scanner.nextLine();
     
-    System.out.print("Data (DD/MM/AAAA): ");
+    System.out.print("Data: ");
     String dataStr = scanner.nextLine();
     LocalDate data = LocalDate.parse(dataStr, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     
-    System.out.print("Hora início (HH:MM): ");
+    System.out.print("Hora início: ");
     String horaInicioStr = scanner.nextLine();
     LocalTime horaInicio = LocalTime.parse(horaInicioStr);
     
-    System.out.print("Hora fim (HH:MM): ");
+    System.out.print("Hora fim: ");
     String horaFimStr = scanner.nextLine();
     LocalTime horaFim = LocalTime.parse(horaFimStr);
     
@@ -248,7 +248,7 @@ public class MenuReservas
 
   private void pausar()
   {
-    System.out.println("Pressione Enter para continuar...");
+    System.out.println("Pressione enter para retornar ao menu anterior");
     scanner.nextLine();
   }
 }

@@ -9,6 +9,8 @@ import controle.AdministradorSistema;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 
 public class MenuEspacos
@@ -32,6 +34,7 @@ public class MenuEspacos
       System.out.println("1. Cadastrar Espaço");
       System.out.println("2. Listar Espaços");
       System.out.println("3. Buscar Espaço");
+      System.out.println("4. Verificar Disponibilidade");
       System.out.println("0. Voltar");
       System.out.print("Escolha uma opção: ");
       
@@ -48,6 +51,9 @@ public class MenuEspacos
           break;
         case 3:
           buscarEspaco();
+          break;
+        case 4:
+          verificarDisponibilidade();
           break;
         case 0:
           continuar = false;
@@ -174,9 +180,38 @@ public class MenuEspacos
     }
   }
 
+  private void verificarDisponibilidade()
+  {
+    System.out.println("»»» KAFFEECOWORKHUB - VERIFICAR DISPONIBILIDADE «««");
+    System.out.println("Exemplo de Formato: 21/12/2024 às 17:14");
+    System.out.println();
+    
+    System.out.print("ID do Espaço: ");
+    String idEspaco = scanner.nextLine();
+    
+    System.out.print("Data: ");
+    String dataStr = scanner.nextLine();
+    
+    System.out.print("Hora: ");
+    String horaStr = scanner.nextLine();
+    
+    try
+    {
+      String[] dateParts = dataStr.split("/");
+      LocalDate data = LocalDate.of(Integer.parseInt(dateParts[2]), Integer.parseInt(dateParts[1]), Integer.parseInt(dateParts[0]));
+      LocalTime hora = LocalTime.parse(horaStr);
+      administrador.verificarDisponibilidade(idEspaco, data, hora);
+    }
+    catch (Exception e)
+    {
+      System.out.println("Erro: " + e.getMessage());
+    }
+    pausar();
+  }
+
   private void pausar()
   {
-    System.out.println("Pressione Enter para continuar...");
+    System.out.println("Pressione enter para retornar ao menu anterior");
     scanner.nextLine();
   }
 }

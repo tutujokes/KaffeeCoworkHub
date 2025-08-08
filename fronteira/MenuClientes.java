@@ -156,7 +156,7 @@ public class MenuClientes
 
   private void pausar()
   {
-    System.out.println("Pressione Enter para continuar...");
+    System.out.println("Pressione enter para retornar ao menu anterior");
     scanner.nextLine();
   }
 }

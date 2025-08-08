@@ -1,5 +1,6 @@
 package entidades;
 
+
 public class Auditorio extends Espaco
 {
   private int capacidadeMaxima;
